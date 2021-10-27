@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
-    public Text ScoreText;
+    public Text ScoreText, BestScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -18,7 +19,7 @@ public class MainManager : MonoBehaviour
     
     private bool m_GameOver = false;
 
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -36,6 +37,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        ShowBestScore();
     }
 
     private void Update()
@@ -45,7 +48,7 @@ public class MainManager : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 m_Started = true;
-                float randomDirection = Random.Range(-1.0f, 1.0f);
+                float randomDirection = UnityEngine.Random.Range(-1.0f, 1.0f);
                 Vector3 forceDir = new Vector3(randomDirection, 1, 0);
                 forceDir.Normalize();
 
@@ -57,9 +60,15 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                MyEventBroker.CallScoreChanged(m_Points);
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+    }
+
+    private void OnDestroy()
+    {
+        GameOver();
     }
 
     void AddPoint(int point)
@@ -70,7 +79,20 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        MyEventBroker.CallScoreChanged(m_Points);
+
         m_GameOver = true;
-        GameOverText.SetActive(true);
+        if(GameOverText != null)
+            GameOverText.SetActive(true);
     }
+
+
+    void ShowBestScore()
+    {
+        PlayerItem player = DataSaver.Instance.GetBestPlayer();
+        string bestMsg = player == null ? "no score available yet." :
+            $"Best score : {player.userName} : {player.score}";
+        BestScoreText.text = bestMsg;
+    }
+
 }
