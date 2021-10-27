@@ -9,9 +9,8 @@ using Newtonsoft.Json;
 [Serializable]
 public class DataSaver : MonoBehaviour
 {
-    public static DataSaver Instance;
+    public static DataSaver Instance { get; private set; }
     public static string savePath;
-    public string name;
     public int score;
     public bool JsonParsed { get; private set; }
 
